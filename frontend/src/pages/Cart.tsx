@@ -11,30 +11,8 @@ const Cart = () => {
   const [shippingOption, setShippingOption] = useState('standard')
   const [couponCode, setCouponCode] = useState('')
 
-  // Sample cart data for demonstration (replace with actual cart state)
-  const cartItems = items.length > 0 ? items : [
-    {
-      id: 1,
-      name: "iPhone 15 Pro Max (256GB, Natural Titanium)",
-      price: 1199.99,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=150&h=150&fit=crop&crop=center"
-    },
-    {
-      id: 2,
-      name: "Samsung Galaxy S24 Ultra (512GB, Phantom Black)",
-      price: 1299.99,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=150&h=150&fit=crop&crop=center"
-    },
-    {
-      id: 3,
-      name: "Apple AirPods Pro (2nd Generation)",
-      price: 249.99,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=150&h=150&fit=crop&crop=center"
-    }
-  ]
+  // Use actual cart items from Redux store
+  const cartItems = items
 
   const shippingOptions = [
     { value: 'standard', label: 'Standard Shipping (5-7 days)', cost: 9.99 },
@@ -73,7 +51,7 @@ const Cart = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-white rounded-lg shadow-md p-8">
               <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               <h2 className="mt-4 text-2xl font-bold text-gray-900">Your cart is empty</h2>
               <p className="mt-2 text-gray-600">Looks like you haven't added any items to your cart yet.</p>

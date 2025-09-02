@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
 import LandingPage from './pages/LandingPage'
 import ProductList from './pages/ProductList'
 import ProductDetail from './pages/ProductDetail'
@@ -11,7 +10,8 @@ import UserProfile from './pages/UserProfile'
 import AdminDashboard from './pages/AdminDashboard'
 import NewPhones from './pages/NewPhones'
 import UsedPhones from './pages/UsedPhones'
-import Accessories from './pages/Accessories'
+import Default from './pages/Default'
+import About from './pages/About'
 import FlashSale from './pages/FlashSale'
 import MyInfo from './pages/MyInfo'
 
@@ -25,7 +25,8 @@ function App() {
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/new-phones" element={<NewPhones />} />
         <Route path="/used-phones" element={<UsedPhones />} />
-        <Route path="/accessories" element={<Accessories />} />
+        <Route path="/accessories" element={<Default pageName="Accessories" description="Discover a wide range of mobile accessories including cases, chargers, headphones, and more." />} />
+        <Route path="/about" element={<About />} />
         <Route path="/flash-sale" element={<FlashSale />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
