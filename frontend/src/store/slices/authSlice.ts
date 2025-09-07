@@ -1,13 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import axios from 'axios'
-
-interface User {
-  id: number
-  username: string
-  email: string
-  role: string
-  createdAt: string
-}
+import { apiService, User, AuthResponse } from '../../services/api'
 
 interface AuthState {
   user: User | null
@@ -28,16 +20,18 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: { username: string; password: string }) => {
-    const response = await axios.post('/api/v1/auth/login', credentials)
-    return response.data
+    console.log('🔐 [Redux] Login action dispatched for user:', credentials.username)
+    const response = await apiService.login(credentials.username, credentials.password)
+    console.log('🔐 [Redux] Login action completed successfully')
+    return response
   }
 )
 
 export const register = createAsyncThunk(
   'auth/register',
   async (userData: { username: string; password: string; email: string }) => {
-    const response = await axios.post('/api/v1/auth/register', userData)
-    return response.data
+    const response = await apiService.register(userData.username, userData.password, userData.email)
+    return response
   }
 )
 
@@ -61,7 +55,7 @@ const authSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<{ token: string; user: User }>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
         state.loading = false
         state.user = action.payload.user
         state.token = action.payload.token
@@ -76,9 +70,12 @@ const authSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(register.fulfilled, (state, action: PayloadAction<User>) => {
+      .addCase(register.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
         state.loading = false
-        state.user = action.payload
+        state.user = action.payload.user
+        state.token = action.payload.token
+        state.isAuthenticated = true
+        localStorage.setItem('token', action.payload.token)
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false

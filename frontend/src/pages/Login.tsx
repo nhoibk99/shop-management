@@ -34,7 +34,7 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Convert email to username for API compatibility
+    // Use input value as username for API compatibility
     const loginData = {
       username: formData.email,
       password: formData.password,
@@ -69,7 +69,7 @@ const Login = () => {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email/Phone Input */}
+              {/* Username/Email Input */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,10 +79,10 @@ const Login = () => {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                  placeholder="your.email@example.com or +1234567890"
+                  placeholder="Username or email"
                   value={formData.email}
                   onChange={handleChange}
                 />

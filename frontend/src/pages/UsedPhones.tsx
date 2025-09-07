@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../store/store'
-import { fetchProducts } from '../store/slices/productSlice'
+import { filterProducts } from '../store/slices/productSlice'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SidebarFilter from '../components/SidebarFilter'
@@ -10,135 +10,26 @@ import Pagination from '../components/Pagination'
 
 const UsedPhones = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { loading } = useSelector((state: RootState) => state.products)
+  const { products, loading } = useSelector((state: RootState) => state.products)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   useEffect(() => {
-    dispatch(fetchProducts())
+    console.log('📱 [UsedPhones] Component mounted, dispatching filterProducts for USED condition')
+    dispatch(filterProducts({ condition: 'USED' }))
   }, [dispatch])
 
-  // Mock data for used phones
-  const usedPhones: Array<{
-    id: number
-    name: string
-    price: number
-    image: string
-    specs: {
-      storage?: string
-      color: string
-      screenSize: string
-    }
-    label: 'old' | 'new' | 'sale' | 'featured'
-    labelText: string
-  }> = [
-    {
-      id: 101,
-      name: 'iPhone 14 Pro (Used)',
-      price: 699.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Deep Purple',
-        screenSize: '6.1" Super Retina XDR'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 102,
-      name: 'Samsung Galaxy S23 (Used)',
-      price: 549.99,
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Phantom Black',
-        screenSize: '6.1" AMOLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 103,
-      name: 'Google Pixel 7 Pro (Used)',
-      price: 449.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Obsidian',
-        screenSize: '6.7" OLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 104,
-      name: 'OnePlus 10 Pro (Used)',
-      price: 399.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Volcanic Black',
-        screenSize: '6.7" AMOLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 105,
-      name: 'iPhone 13 (Used)',
-      price: 499.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Blue',
-        screenSize: '6.1" Super Retina XDR'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 106,
-      name: 'Samsung Galaxy S22 (Used)',
-      price: 399.99,
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Green',
-        screenSize: '6.1" AMOLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 107,
-      name: 'Xiaomi 12 Pro (Used)',
-      price: 299.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Gray',
-        screenSize: '6.73" AMOLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    },
-    {
-      id: 108,
-      name: 'Nothing Phone 1 (Used)',
-      price: 249.99,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'White',
-        screenSize: '6.55" OLED'
-      },
-      label: 'old',
-      labelText: 'USED'
-    }
-  ]
+  // Products are already filtered by backend, no need to filter again
+  const usedPhones = products
+
+  // Log products data for debugging
+  console.log('📱 [UsedPhones] Current products state:', {
+    totalProducts: products.length,
+    loading,
+    products: products.map(p => ({ id: p.id, name: p.name, condition: p.condition }))
+  })
 
   // Filter and sort products
   const filteredProducts = usedPhones.filter(() => {
@@ -260,7 +151,7 @@ const UsedPhones = () => {
                       id={product.id}
                       name={product.name}
                       price={product.price}
-                      image={product.image}
+                      image={product.imageUrl}
                       specs={product.specs}
                       label={product.label}
                       labelText={product.labelText}

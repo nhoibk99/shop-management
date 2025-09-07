@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../store/store'
 import { logout } from '../store/slices/authSlice'
+import { searchProducts } from '../store/slices/productSlice'
 
 interface HeaderProps {
   activePage: string
@@ -14,6 +15,7 @@ const Header = ({ activePage }: HeaderProps) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   
   const cartDropdownRef = useRef<HTMLDivElement>(null)
   const userDropdownRef = useRef<HTMLDivElement>(null)
@@ -34,6 +36,20 @@ const Header = ({ activePage }: HeaderProps) => {
   const handleLogout = () => {
     dispatch(logout())
     setIsUserDropdownOpen(false)
+  }
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      dispatch(searchProducts(searchQuery))
+      navigate('/product-list')
+      setIsSearchOpen(false)
+    }
+  }
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
   }
 
   // Close dropdowns when clicking outside
@@ -163,11 +179,17 @@ const Header = ({ activePage }: HeaderProps) => {
                         type="text"
                         placeholder="Search for phones and accessories..."
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleSearchKeyPress}
                         autoFocus
                       />
                     </div>
                     <div className="mt-4 flex gap-2">
-                      <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                      <button 
+                        onClick={handleSearch}
+                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
                         Search
                       </button>
                       <button 

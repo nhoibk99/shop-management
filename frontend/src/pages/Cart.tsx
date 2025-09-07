@@ -1,15 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { RootState } from '../store/store'
-import { updateQuantity, removeFromCart } from '../store/slices/cartSlice'
+import { RootState, AppDispatch } from '../store/store'
+import { updateQuantity, removeFromCart, createOrder } from '../store/slices/cartSlice'
 import Header from '../components/Header'
 
 const Cart = () => {
-  const dispatch = useDispatch()
-  const { items } = useSelector((state: RootState) => state.cart)
+  const dispatch = useDispatch<AppDispatch>()
+  const { items, loading, error } = useSelector((state: RootState) => state.cart)
   const [shippingOption, setShippingOption] = useState('standard')
   const [couponCode, setCouponCode] = useState('')
+
+  // Log page mount and cart state
+  useEffect(() => {
+    console.log('🛒 [Cart] Component mounted')
+    console.log('🛒 [Cart] Current cart state:', {
+      itemCount: items.length,
+      totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
+      items: items.map(item => ({ id: item.id, name: item.name, quantity: item.quantity }))
+    })
+    return () => {
+      console.log('🛒 [Cart] Component unmounted')
+    }
+  }, [items])
 
   // Use actual cart items from Redux store
   const cartItems = items
@@ -28,18 +41,32 @@ const Cart = () => {
   const total = subtotal + shipping + tax
 
   const handleQuantityChange = (itemId: number, newQuantity: number) => {
+    console.log('🛒 [Cart] Updating quantity for item:', itemId, 'to:', newQuantity)
     if (newQuantity > 0) {
       dispatch(updateQuantity({ id: itemId, quantity: newQuantity }))
     }
   }
 
   const handleRemoveItem = (itemId: number) => {
+    console.log('🛒 [Cart] Removing item from cart:', itemId)
     dispatch(removeFromCart(itemId))
   }
 
   const handleApplyCoupon = () => {
+    console.log('🛒 [Cart] Applying coupon code:', couponCode)
     // TODO: Implement coupon logic
-    console.log('Applying coupon:', couponCode)
+  }
+
+  const handleCreateOrder = () => {
+    console.log('🛒 [Cart] Creating order with items:', cartItems.length)
+    const orderItems = cartItems.map(item => ({
+      productId: item.id,
+      quantity: item.quantity,
+      price: item.price
+    }))
+    
+    console.log('🛒 [Cart] Order items:', orderItems)
+    dispatch(createOrder({ orderItems }))
   }
 
   if (cartItems.length === 0) {
@@ -233,13 +260,28 @@ const Cart = () => {
                   </div>
                 </div>
                 
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
                 <div className="mt-6">
-                  <Link
-                    to="/checkout"
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium text-center block"
+                  <button
+                    onClick={handleCreateOrder}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium text-center block disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Proceed to Checkout
-                  </Link>
+                    {loading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Creating Order...
+                      </div>
+                    ) : (
+                      'Proceed to Checkout'
+                    )}
+                  </button>
                 </div>
                 
                 <div className="mt-4 text-center">

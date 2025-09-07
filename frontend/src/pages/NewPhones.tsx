@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../store/store'
-import { fetchProducts } from '../store/slices/productSlice'
+import { filterProducts } from '../store/slices/productSlice'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SidebarFilter from '../components/SidebarFilter'
@@ -10,115 +10,36 @@ import Pagination from '../components/Pagination'
 
 const NewPhones = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { loading } = useSelector((state: RootState) => state.products)
+  const { products, loading } = useSelector((state: RootState) => state.products)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   useEffect(() => {
-    dispatch(fetchProducts())
+    console.log('📱 [NewPhones] Component mounted, dispatching filterProducts for NEW condition')
+    dispatch(filterProducts({ condition: 'NEW' }))
   }, [dispatch])
 
-  // Mock data for new phones
-  const newPhones = [
-    {
-      id: 1,
-      name: 'Samsung Galaxy S24 Ultra',
-      price: 1199.99,
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Phantom Black',
-        screenSize: '6.8" AMOLED'
-      }
-    },
-    {
-      id: 2,
-      name: 'Apple iPhone 15 Pro',
-      price: 999.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Space Gray',
-        screenSize: '6.1" Super Retina XDR'
-      }
-    },
-    {
-      id: 3,
-      name: 'Google Pixel 8 Pro',
-      price: 899.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        color: 'Obsidian',
-        screenSize: '6.7" OLED'
-      }
-    },
-    {
-      id: 4,
-      name: 'Xiaomi 13 Pro',
-      price: 649.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Ceramic Black',
-        screenSize: '6.73" AMOLED'
-      }
-    },
-    {
-      id: 5,
-      name: 'OnePlus 11',
-      price: 499.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Titan Black',
-        screenSize: '6.7" AMOLED'
-      }
-    },
-    {
-      id: 6,
-      name: 'Nothing Phone 2',
-      price: 599.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'White',
-        screenSize: '6.7" OLED'
-      }
-    },
-    {
-      id: 7,
-      name: 'ASUS ROG Phone 7',
-      price: 799.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '256GB',
-        color: 'Phantom Black',
-        screenSize: '6.78" AMOLED'
-      }
-    },
-    {
-      id: 8,
-      name: 'Motorola Edge 40',
-      price: 449.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop',
-      specs: {
-        storage: '128GB',
-        color: 'Nebula Green',
-        screenSize: '6.55" OLED'
-      }
-    }
-  ]
+  // Products are already filtered by backend, no need to filter again
+  const newPhones = products
+
+  // Log products data for debugging
+  console.log('📱 [NewPhones] Current products state:', {
+    totalProducts: products.length,
+    loading,
+    products: products.map(p => ({ id: p.id, name: p.name, condition: p.condition }))
+  })
 
   const handlePageChange = (page: number) => {
+    console.log('📱 [NewPhones] Page changed to:', page)
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleLoadMore = () => {
+    console.log('📱 [NewPhones] Load more clicked')
     // TODO: Implement load more functionality
-    console.log('Loading more products...')
   }
 
   const sortedProducts = [...newPhones].sort((a, b) => {
@@ -223,8 +144,10 @@ const NewPhones = () => {
                       id={product.id}
                       name={product.name}
                       price={product.price}
-                      image={product.image}
+                      image={product.imageUrl}
                       specs={product.specs}
+                      label={product.label}
+                      labelText={product.labelText}
                     />
                   ))}
                 </div>

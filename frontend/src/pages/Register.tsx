@@ -1,5 +1,8 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../store/store'
+import { register, clearError } from '../store/slices/authSlice'
 import Header from '../components/Header'
 
 const Register = () => {
@@ -10,10 +13,32 @@ const Register = () => {
     confirmPassword: '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
+  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/')
+    }
+    return () => {
+      dispatch(clearError())
+    }
+  }, [isAuthenticated, navigate, dispatch])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement registration logic
-    console.log('Register form submitted:', formData)
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match')
+      return
+    }
+
+    dispatch(register({
+      username: formData.username,
+      email: formData.email,
+      password: formData.password
+    }))
   }
 
   return (
@@ -34,6 +59,13 @@ const Register = () => {
             </p>
           </div>
           
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <input
@@ -77,9 +109,17 @@ const Register = () => {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Register
+                {loading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Creating account...
+                  </div>
+                ) : (
+                  'Register'
+                )}
               </button>
             </div>
           </form>
