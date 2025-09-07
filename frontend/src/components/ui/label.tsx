@@ -7,7 +7,7 @@ const labelVariants = cva(
     variants: {
       variant: {
         new: "bg-green-500 text-white",
-        old: "bg-orange-500 text-white",
+        used: "bg-yellow-400 text-black border-2 border-white shadow-lg",
         sale: "bg-red-500 text-white",
         featured: "bg-blue-500 text-white",
         default: "bg-gray-500 text-white"

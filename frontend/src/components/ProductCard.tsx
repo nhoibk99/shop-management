@@ -9,7 +9,7 @@ interface ProductCardProps {
   price: number
   image?: string
   specs?: string
-  label?: 'new' | 'old' | 'sale' | 'featured'
+  label?: 'new' | 'used' | 'sale' | 'featured'
   labelText?: string
 }
 
@@ -79,7 +79,7 @@ const ProductCard = ({ id, name, price, image, specs, label = 'new', labelText }
           variant={label} 
           className="absolute top-3 right-3"
         >
-          {labelText || (label === 'new' ? 'NEW' : label === 'old' ? 'OLD' : label?.toUpperCase() || 'NEW')}
+          {labelText || (label === 'new' ? 'NEW' : label === 'used' ? 'USED' : label?.toUpperCase() || 'NEW')}
         </Label>
       </div>
       
@@ -88,64 +88,66 @@ const ProductCard = ({ id, name, price, image, specs, label = 'new', labelText }
           {name}
         </h3>
         
-        <div className="text-sm text-gray-600 space-y-1 mb-4 flex-grow">
+        <div className="flex-grow"></div>
+        
+        <div className="text-sm text-gray-600 space-y-1 mb-4">
           {parsedSpecs ? (
             <>
               {parsedSpecs.storage && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Storage:</span>
-                  <span className="font-medium">{parsedSpecs.storage}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.storage}</span>
+                </div>
               )}
               {parsedSpecs.color && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Color:</span>
-                  <span className="font-medium">{parsedSpecs.color}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.color}</span>
+                </div>
               )}
               {parsedSpecs.screenSize && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Screen:</span>
-                  <span className="font-medium">{parsedSpecs.screenSize}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.screenSize}</span>
+                </div>
               )}
               {parsedSpecs.processor && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Processor:</span>
-                  <span className="font-medium">{parsedSpecs.processor}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.processor}</span>
+                </div>
               )}
               {parsedSpecs.ram && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">RAM:</span>
-                  <span className="font-medium">{parsedSpecs.ram}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.ram}</span>
+                </div>
               )}
               {parsedSpecs.camera && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Camera:</span>
-                  <span className="font-medium">{parsedSpecs.camera}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.camera}</span>
+                </div>
               )}
               {parsedSpecs.battery && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">Battery:</span>
-                  <span className="font-medium">{parsedSpecs.battery}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.battery}</span>
+                </div>
               )}
               {parsedSpecs.os && (
-                <p className="flex justify-between">
+                <div className="flex justify-between truncate">
                   <span className="text-gray-500">OS:</span>
-                  <span className="font-medium">{parsedSpecs.os}</span>
-                </p>
+                  <span className="font-medium truncate ml-2">{parsedSpecs.os}</span>
+                </div>
               )}
             </>
           ) : (
-            <p className="text-gray-400">No specifications available</p>
+            <div className="text-gray-400">No specifications available</div>
           )}
         </div>
         
-        <div className="flex justify-between items-center mt-auto">
+        <div className="flex justify-between items-center">
           <span className="text-xl font-bold text-blue-600">
             ${typeof price === 'number' ? price.toFixed(2) : '0.00'}
           </span>
