@@ -20,11 +20,17 @@ export interface Product {
   name: string
   description?: string
   price: number
+  oldPrice?: number
   condition: 'NEW' | 'USED'
   stock: number
   categoryId: number
   imageUrl?: string
-  specs?: any
+  images?: string[]
+  tags?: string[]
+  specs?: any // Keep for backward compatibility
+  specifications?: Record<string, string> // New specifications field
+  warrantyAndReturnPolicy?: string
+  reviews?: Review[]
   label?: string
   labelText?: string
   category?: {
@@ -36,6 +42,14 @@ export interface Product {
 export interface Category {
   id: number
   name: string
+}
+
+export interface Review {
+  id: number
+  authorName: string
+  rating: number
+  comment: string
+  createdAt: string
 }
 
 export interface OrderItem {

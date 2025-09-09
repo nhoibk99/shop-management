@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { addToCart } from '../store/slices/cartSlice'
+import { apiService, Product } from '../services/api'
 import Header from '../components/Header'
 import ProductImageGallery from '../components/ProductImageGallery'
 import ProductInfo from '../components/ProductInfo'
@@ -14,9 +15,13 @@ const ProductDetail = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(true)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [relatedAccessories, setRelatedAccessories] = useState<Product[]>([])
+  const [loadingRelated, setLoadingRelated] = useState(false)
 
-  // Mock product data
-  const product = {
+  // Mock product data (fallback)
+  const mockProduct = {
     id: 1,
     name: 'iPhone 15 Pro Max (256GB, Natural Titanium)',
     images: [
@@ -68,52 +73,92 @@ const ProductDetail = () => {
     warranty: 'This product comes with Apple\'s standard 1-year limited warranty. Extended warranty options are available for purchase. We offer a 30-day return policy for any reason, with full refund or exchange. All products are thoroughly tested and certified before shipping.'
   }
 
-  // Mock related accessories
-  const relatedAccessories = [
-    {
-      id: 1,
-      name: 'Apple MagSafe Charger',
-      price: 39.00,
-      image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop',
-      badge: 'New'
-    },
-    {
-      id: 2,
-      name: 'iPhone 15 Pro Max Case',
-      price: 49.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop',
-      badge: 'Best Seller'
-    },
-    {
-      id: 3,
-      name: 'Screen Protector',
-      price: 19.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop',
-      badge: 'Limited Stock'
-    },
-    {
-      id: 4,
-      name: 'Lightning to USB-C Cable',
-      price: 29.00,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop'
-    }
-  ]
 
+  // Fetch related accessories from the same category
+  const fetchRelatedAccessories = async (categoryId: number, currentProductId: number) => {
+    try {
+      console.log('🔗 [ProductDetail] Fetching related accessories for category:', categoryId)
+      setLoadingRelated(true)
+      
+      const relatedProducts = await apiService.getProductsByCategory(categoryId)
+      console.log('🔗 [ProductDetail] Related products received:', relatedProducts)
+      
+      // Filter out the current product and limit to 4 items
+      const filteredProducts = relatedProducts
+        .filter(p => p.id !== currentProductId)
+        .slice(0, 4)
+      
+      console.log('🔗 [ProductDetail] Filtered related accessories:', filteredProducts)
+      setRelatedAccessories(filteredProducts)
+    } catch (err) {
+      console.error('🔗 [ProductDetail] Error fetching related accessories:', err)
+      setRelatedAccessories([])
+    } finally {
+      setLoadingRelated(false)
+    }
+  }
+
+  // Fetch product data from API
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 1000)
-    return () => clearTimeout(timer)
+    const fetchProduct = async () => {
+      if (!id) {
+        setError('Product ID not found')
+        setLoading(false)
+        return
+      }
+
+      try {
+        console.log('📱 [ProductDetail] Fetching product with ID:', id)
+        setLoading(true)
+        setError(null)
+        
+        const productData = await apiService.getProduct(parseInt(id))
+        console.log('📱 [ProductDetail] Product data received:', productData)
+        
+        setProduct(productData)
+        
+        // Fetch related accessories if product has a category
+        if (productData.categoryId) {
+          console.log('🔗 [ProductDetail] Product has category, fetching related accessories:', {
+            categoryId: productData.categoryId,
+            categoryName: productData.category?.name,
+            productId: productData.id
+          })
+          await fetchRelatedAccessories(productData.categoryId, productData.id)
+        } else {
+          console.log('🔗 [ProductDetail] Product has no category, skipping related accessories')
+        }
+      } catch (err) {
+        console.error('📱 [ProductDetail] Error fetching product:', err)
+        setError('Failed to load product details')
+        // Use mock data as fallback
+        setProduct(mockProduct as any)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProduct()
   }, [id])
 
   const handleAddToCart = (quantity: number) => {
+    if (!product) return
+    
     // Add item to cart using Redux
     dispatch(addToCart({
       id: product.id,
       name: product.name,
-      price: product.discountedPrice,
+      price: product.price,
       quantity: quantity,
-      image: product.images[0]
+      image: product.imageUrl || product.images?.[0] || ''
     }))
+    
+    console.log('🛒 [ProductDetail] Added to cart:', {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity
+    })
     
     // Redirect to cart page
     navigate('/cart')
@@ -144,6 +189,39 @@ const ProductDetail = () => {
     )
   }
 
+  if (error && !product) {
+    return (
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        <Header activePage="new-phones" />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button 
+              onClick={() => navigate('/')}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Go Back Home
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        <Header activePage="new-phones" />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Product...</h2>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header activePage="new-phones" />
@@ -154,7 +232,7 @@ const ProductDetail = () => {
           {/* Left Column - Product Images */}
           <div>
             <ProductImageGallery 
-              images={product.images} 
+              images={product.images || [product.imageUrl || '']} 
               productName={product.name} 
             />
           </div>
@@ -163,9 +241,9 @@ const ProductDetail = () => {
           <div>
             <ProductInfo
               name={product.name}
-              badges={product.badges}
-              originalPrice={product.originalPrice}
-              discountedPrice={product.discountedPrice}
+              badges={product.tags || []}
+              originalPrice={product.oldPrice || product.price}
+              discountedPrice={product.price}
               stock={product.stock}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
@@ -176,29 +254,40 @@ const ProductDetail = () => {
         {/* Tabbed Information Section */}
         <div className="mb-16">
           <TabbedInfo
-            specifications={product.specifications}
-            description={product.description}
-            reviews={product.reviews}
-            warranty={product.warranty}
+            specifications={product.specifications || {}}
+            description={product.description || ''}
+            reviews={product.reviews || []}
+            warranty={product.warrantyAndReturnPolicy || ''}
           />
         </div>
 
         {/* Related Accessories Section */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Accessories</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedAccessories.map((accessory) => (
-              <AccessoryCard
-                key={accessory.id}
-                id={accessory.id}
-                name={accessory.name}
-                price={accessory.price}
-                image={accessory.image}
-                badge={accessory.badge}
-              />
-            ))}
+        {relatedAccessories.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+              Related Products from {product.category?.name || 'Same Category'}
+            </h2>
+            {loadingRelated ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Loading related products...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {relatedAccessories.map((accessory) => (
+                  <AccessoryCard
+                    key={accessory.id}
+                    id={accessory.id}
+                    name={accessory.name}
+                    price={accessory.price}
+                    image={accessory.imageUrl || ''}
+                    badge={accessory.labelText || 'NEW'}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
       
       <Footer />

@@ -8,19 +8,20 @@ interface ProductCardProps {
   name: string
   price: number
   image?: string
-  specs?: string
+  specs?: string // Keep for backward compatibility
+  specifications?: Record<string, string> // New specifications field
   label?: 'new' | 'used' | 'sale' | 'featured'
   labelText?: string
 }
 
-const ProductCard = ({ id, name, price, image, specs, label = 'new', labelText }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, image, specs, specifications, label = 'new', labelText }: ProductCardProps) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  // Debug image prop
-  console.log('🖼️ [ProductCard] Image prop:', { id, name, image })
+  // Debug props
+  console.log('🖼️ [ProductCard] Props:', { id, name, image, specs, specifications })
 
-  // Parse specs JSON string
+  // Parse specs JSON string (for backward compatibility)
   const parsedSpecs = specs ? (() => {
     try {
       return JSON.parse(specs)
@@ -30,7 +31,14 @@ const ProductCard = ({ id, name, price, image, specs, label = 'new', labelText }
     }
   })() : null
 
+  // Use new specifications field if available, otherwise fall back to parsed specs
+  const displaySpecs = specifications || parsedSpecs
+  
+  // Debug displaySpecs
+  console.log('📋 [ProductCard] DisplaySpecs:', { id, name, displaySpecs })
+
   const handleCardClick = () => {
+    console.log('🖱️ [ProductCard] Card clicked, navigating to product:', id)
     navigate(`/products/${id}`)
   }
 
@@ -91,54 +99,54 @@ const ProductCard = ({ id, name, price, image, specs, label = 'new', labelText }
         <div className="flex-grow"></div>
         
         <div className="text-sm text-gray-600 space-y-1 mb-4">
-          {parsedSpecs ? (
+          {displaySpecs ? (
             <>
-              {parsedSpecs.storage && (
+              {displaySpecs.Storage && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Storage:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.storage}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.Storage}</span>
                 </div>
               )}
-              {parsedSpecs.color && (
+              {displaySpecs.Color && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Color:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.color}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.Color}</span>
                 </div>
               )}
-              {parsedSpecs.screenSize && (
+              {displaySpecs['Screen Size'] && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Screen:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.screenSize}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs['Screen Size']}</span>
                 </div>
               )}
-              {parsedSpecs.processor && (
+              {displaySpecs.Processor && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Processor:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.processor}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.Processor}</span>
                 </div>
               )}
-              {parsedSpecs.ram && (
+              {displaySpecs.RAM && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">RAM:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.ram}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.RAM}</span>
                 </div>
               )}
-              {parsedSpecs.camera && (
+              {displaySpecs.Camera && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Camera:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.camera}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.Camera}</span>
                 </div>
               )}
-              {parsedSpecs.battery && (
+              {displaySpecs.Battery && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">Battery:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.battery}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.Battery}</span>
                 </div>
               )}
-              {parsedSpecs.os && (
+              {displaySpecs.OS && (
                 <div className="flex justify-between truncate">
                   <span className="text-gray-500">OS:</span>
-                  <span className="font-medium truncate ml-2">{parsedSpecs.os}</span>
+                  <span className="font-medium truncate ml-2">{displaySpecs.OS}</span>
                 </div>
               )}
             </>

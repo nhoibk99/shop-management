@@ -153,6 +153,7 @@ const UsedPhones = () => {
                       price={product.price}
                       image={product.imageUrl}
                       specs={product.specs}
+                      specifications={product.specifications}
                       label={product.label}
                       labelText={product.labelText}
                     />
